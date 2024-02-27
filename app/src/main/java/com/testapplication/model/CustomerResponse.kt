@@ -8,6 +8,6 @@ data class CustomerResponse(
 
 data class CustomerData(
     val count: Int,
-    val customers: List<Customer>
+    val customers: MutableList<Customer>
 )
 

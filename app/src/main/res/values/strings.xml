@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">TestApplication</string>
+    <string name="app_name">TestApp</string>
+    <string name="customers">Customers</string>
+    <string name="search">Search</string>
 </resources>

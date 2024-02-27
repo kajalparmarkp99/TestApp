@@ -13,23 +13,12 @@ class CustomerViewModel : ViewModel() {
 
     private var _customers = MutableLiveData<CustomerResponse>()
     val customers: LiveData<CustomerResponse> get() = _customers
-
-    // Add search query LiveData
-    private val _searchQuery = MutableLiveData<String>()
-    val searchQuery: LiveData<String> get() = _searchQuery
-
     init {
-        fetchCustomers()
+        fetchCustomers("", "", 1,10)
     }
-
-    fun fetchCustomers() : MutableLiveData<CustomerResponse> {
-        _customers = CustomerRepository.getCustomers()
+    fun fetchCustomers(name: String?, number: String?, pageNo: Int?,pageSize:Int?) : MutableLiveData<CustomerResponse> {
+        _customers = CustomerRepository.getCustomers(name,number,pageNo,pageSize)
         return _customers
 
-    }
-
-    // Function to set search query
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
     }
 }

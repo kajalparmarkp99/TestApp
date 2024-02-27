@@ -11,29 +11,25 @@ import com.testapplication.R
 import com.testapplication.model.Customer
 import java.util.Locale
 
-class CustomerAdapter : RecyclerView.Adapter<CustomerAdapter.CustomerViewHolder>(), Filterable {
-    private var customers: List<Customer> = listOf()
-    private var filteredCustomers: List<Customer> = listOf()
+class CustomerAdapter(private var customersList: List<Customer?>) :
+    RecyclerView.Adapter<CustomerAdapter.CustomerViewHolder>(), Filterable {
 
+    private var filteredCustomers: List<Customer?> = listOf()
 
-    fun setData(customers: List<Customer>) {
-        this.customers = customers
-        this.filteredCustomers = customers
-        notifyDataSetChanged()
-    }
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
-                val filteredList = mutableListOf<Customer>()
-                val filterPattern = constraint?.toString()?.toLowerCase(Locale.ROOT)?.trim()
+                val filteredList = mutableListOf<Customer?>()
 
+                val filterPattern = constraint?.toString()?.lowercase(Locale.ROOT)?.trim()
                 filterPattern?.let {
                     if (it.isEmpty()) {
-                        filteredList.addAll(customers)
+                        filteredList.addAll(customersList)
                     } else {
-                        customers.forEach { customer ->
-                            if (customer.name.toLowerCase(Locale.ROOT).contains(filterPattern) ||
-                                customer.mobile.contains(filterPattern)
+                        customersList.forEach { customer ->
+                            if (customer?.name?.lowercase(Locale.ROOT)
+                                    ?.contains(filterPattern) == true ||
+                                customer?.mobile?.contains(filterPattern) == true
                             ) {
                                 filteredList.add(customer)
                             }
@@ -46,39 +42,58 @@ class CustomerAdapter : RecyclerView.Adapter<CustomerAdapter.CustomerViewHolder>
                 return filterResults
             }
 
-            @Suppress("UNCHECKED_CAST")
             override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-                filteredCustomers = results?.values as List<Customer>
+                filteredCustomers = results?.values as List<Customer?>
                 notifyDataSetChanged()
             }
         }
     }
-    fun updateData(newList: List<Customer>) {
-        customers = newList
-        notifyDataSetChanged()
-    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomerViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.customer_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.customer_item, parent, false)
         return CustomerViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: CustomerViewHolder, position: Int) {
-        val customer = customers[position]
-        holder.bind(customer)
+        val customer = customersList[position]
+        if (customer != null) {
+            holder.bind(customer)
+        }
     }
 
     override fun getItemCount(): Int {
-        return customers.size
+        return customersList.size
     }
 
     class CustomerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val textViewName: TextView = itemView.findViewById(R.id.txtName)
         private val textViewMobile: TextView = itemView.findViewById(R.id.txtMobileNo)
+        private val textViewImage: TextView = itemView.findViewById(R.id.imageText)
+        private val textEmail: TextView = itemView.findViewById(R.id.txtEmail)
 
         fun bind(customer: Customer) {
             textViewName.text = customer.name
             textViewMobile.text = customer.mobile
-            // Bind other customer information here if needed
+            if (!customer.email.isNullOrEmpty()) {
+                textEmail.text = customer.email
+            }
+
+            if (!customer.name.isNullOrEmpty()) {
+                val initials = if (customer.name.contains(" ")) {
+                    val words = customer.name.split(" ")
+                    val nonEmptyWords = words.filter { it.isNotEmpty() }
+                    if (nonEmptyWords.isNotEmpty()) {
+                        nonEmptyWords.map { it.first() }.joinToString("")
+                    } else {
+                        ""
+                    }
+                } else {
+                    customer.name.first().toString()
+                }
+                // Set the initials to your TextView or wherever you want to display them
+                textViewImage.text = initials.uppercase()
+            }
         }
     }
 
